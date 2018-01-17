@@ -76,7 +76,9 @@ final class BoardPane extends GridPane {
                     t_row = getRowIndex(pane);
                     t_col = getColumnIndex(pane);
 
-                    if (board.isLegal(s_row, s_col, getDirection(), getPower()) && activePane != pane) {
+                    if (board.isLegal(s_row, s_col, getDirection(), getPower()) &&
+                            activePane != pane &&
+                            !isFriend(pane)) {
 
                         pane.dragDrop(e);
                         activePane.setImg(0);
@@ -207,10 +209,11 @@ final class BoardPane extends GridPane {
     }
 
     private int getDirection() {
+
         ShogiPiece sp = board.getPiece(s_row, s_col);
 
         if (sp.equals(Koma.KEIMA))
-            return (board.turn() ? s_col > t_col : s_col < t_col) ? 7 : 5;
+            return (board.turn() ? s_col > t_col : s_col < t_col) ? 70 : 50;
 
         else if (board.turn() ? (s_row < t_row && s_col < t_col) : (s_row > t_row && s_col > t_col)) {
 
@@ -255,7 +258,6 @@ final class BoardPane extends GridPane {
         switch (getDirection()) {
             case 0:
             case 1:
-                return board.turn() ? t_row - s_row : s_row - t_row;
             case 2:
                 return board.turn() ? t_row - s_row : s_row - t_row;
             case 3:
@@ -291,6 +293,7 @@ final class BoardPane extends GridPane {
             else
                 info.add(sp, t_row, t_col, isKilling);
 
+            System.out.printf("Move: [%d][%d][%d][%d]", s_row, s_col, getDirection(), getPower());
             board.movePiece(s_row, s_col,
                     getDirection(),
                     getPower(), promoted.get());
