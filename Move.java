@@ -4,8 +4,8 @@ import tools.Tools;
 
 final class Move implements ShogiMove {
 
-    private int row;
-    private int col;
+    private final int row;
+    private final int col;
     private int dir;
     private int pow;
     private boolean promo;
@@ -30,11 +30,6 @@ final class Move implements ShogiMove {
     @Override
     public int compareTo(ShogiMove other) {
         return Integer.compare(Tools.getValue(victim), Tools.getValue(other.getVictim()));
-    }
-
-    @Override
-    public ShogiPiece getShogi() {
-        return Tools.getPiece(drop - 100);
     }
 
     @Override

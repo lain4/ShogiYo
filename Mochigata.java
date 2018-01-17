@@ -10,7 +10,7 @@ import java.util.List;
 
 final class Mochigata extends GridPane {
 
-    private ToggleGroup tg = new ToggleGroup();
+    private final ToggleGroup tg = new ToggleGroup();
 
     Mochigata(boolean player) {
 

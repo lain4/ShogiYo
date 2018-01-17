@@ -18,11 +18,7 @@ interface ShogiBoard {
 
     List<ShogiMove> getAllMoves();
 
-    int see(int row, int col);
-
     int getPresence();
-
-    boolean isLegal(ShogiMove move);
 
     ShogiMove getLastMove();
 
@@ -40,13 +36,7 @@ interface ShogiBoard {
 
     boolean canDrop(ShogiPiece sp, int row, int col);
 
-    boolean hasMochi();
-
     int getAvailablePath(int row, int col, int dir);
-
-    boolean isPromotable(int row, int col);
-
-    boolean hasSpace(ShogiPiece sp, int row);
 
     boolean isMate(int row, int col, int dir, int pow);
 
@@ -54,17 +44,11 @@ interface ShogiBoard {
 
     int getMaterialValue();
 
-    boolean isEnemyKing(int row, int col);
-
-    boolean isOwnKing(int row, int col);
-
     int getDef();
 
     void dropPiece(ShogiPiece sp, int row, int col);
 
     void endTurn();
-
-    void setTurn(boolean turn);
 
 
     //MOVE PIECE @row, col -> DIRECTION dir -> POWER pow

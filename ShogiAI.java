@@ -12,17 +12,10 @@ import java.util.stream.Collectors;
 final class ShogiAI {
 
 
-    private ShogiBoard board;
-    private int maxDepth = 4;
+    private final ShogiBoard board;
+    private final int maxDepth = 4;
     private ShogiMove myMove = null;
     private Node<ShogiNode> root = null;
-    /*
-        0 - EarlyGame
-        1 - MidGame
-        2 - Initiative
-        3 - EndGame
-     */
-    private int phase = 0;
 
 
     ShogiAI(ShogiBoard board) {
@@ -131,6 +124,7 @@ final class ShogiAI {
     }
 
 
+    @SuppressWarnings("ConstantConditions")
     final ShogiMove getRandomMove() {
 
         System.out.println("---------------------------");
@@ -172,33 +166,6 @@ final class ShogiAI {
     }
 
 
-    private <ShogiNode> void updateTree(Node<ShogiNode> node) {
-        boolean prev = board.turn();
-        if (node.isEmpty()) {
-            System.out.println("adding leafs!");
-            getAllMoves().forEach(node::addChild);
-        } else {
-            System.out.println("searching leafs!");
-            board.endTurn();
-            node.getChildren().forEach(this::updateTree);
-            board.endTurn();
-        }
-        if (prev != board.turn()) board.endTurn();
-    }
-
-    private Node<ShogiNode> createTree() {
-        ShogiMove first = new Move(2, 2, 6, 1, false, 0);
-        Node<ShogiNode> root = new ShogiNode(first, getValue(first));
-
-        while (root.getDepth() < maxDepth)
-            addLayer(root);
-
-        System.out.println("DEPTH: " + root.getDepth());
-        System.out.println("SIZE: " + root.getSize());
-
-        return root;
-    }
-
     private <ShogiNode> void addLayer(Node<ShogiNode> node) {
         if (node.isEmpty()) {
             board.move(node.getMove());
@@ -210,11 +177,6 @@ final class ShogiAI {
             board.undo(node.getMove());
         }
 
-    }
-
-    private <ShogiNode> void printTree(Node<ShogiNode> node, String str) {
-        System.out.println(str + node.getData() + ": " + node.getValue());
-        node.getChildren().forEach(e -> printTree(e, str + str));
     }
 
 

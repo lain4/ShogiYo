@@ -11,10 +11,6 @@ public interface ShogiPiece {
 
     boolean isPromotable();
 
-    byte getPattern();
-
-    byte getPower();
-
     int[] getDir();
 
     boolean canMove(int dir, boolean pow);
@@ -24,10 +20,6 @@ public interface ShogiPiece {
     int getPromOrd();
 
     int getOriOrd();
-
-    ShogiPiece getPromo();
-
-    ShogiPiece getOrigin();
 
     String getName();
 

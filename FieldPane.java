@@ -17,7 +17,7 @@ final class FieldPane extends ToggleButton {
         setToggleGroup(tg);
 
         setStyle("-fx-text-fill: black;" +
-                "-fx-font-weight: 200;" +
+                "-fx-font-weight: lighter;" +
                 "-fx-font-size: 20;" +
                 "-fx-font-family: sans-serif;" +
                 "-fx-text-alignment: center;" +

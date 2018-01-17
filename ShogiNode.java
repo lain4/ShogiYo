@@ -5,10 +5,10 @@ import java.util.List;
 
 final class ShogiNode implements Node<ShogiNode>, Comparable<ShogiNode> {
 
-    private ShogiMove move;
-    private List<Node<ShogiNode>> children = new ArrayList<>();
+    private final ShogiMove move;
+    private final List<Node<ShogiNode>> children = new ArrayList<>();
     private Node<ShogiNode> parent = null;
-    private int value;
+    private final int value;
 
 
     ShogiNode(ShogiMove move, int value) {
@@ -50,48 +50,8 @@ final class ShogiNode implements Node<ShogiNode>, Comparable<ShogiNode> {
     }
 
     @Override
-    public Node addChild(Node<ShogiNode> child) {
-        child.setParent(this);
-        children.add(child);
-        return child;
-    }
-
-    @Override
     public Node<ShogiNode> getRoot() {
         return parent == null ? this : parent.getRoot();
-    }
-
-    @Override
-    public void deleteNode() {
-        if (parent != null) {
-            int index = this.parent.getChildren().indexOf(this);
-            this.parent.getChildren().remove(this);
-            for (Node<ShogiNode> each : getChildren()) {
-                each.setParent(this.parent);
-            }
-            this.parent.getChildren().addAll(index, this.getChildren());
-        } else {
-            deleteRootNode();
-        }
-        this.getChildren().clear();
-    }
-
-    private Node<ShogiNode> deleteRootNode() {
-        if (parent != null) {
-            throw new IllegalStateException("deleteRootNode not called on root");
-        }
-        Node<ShogiNode> newParent = null;
-        if (!getChildren().isEmpty()) {
-            newParent = getChildren().get(0);
-            newParent.setParent(null);
-            getChildren().remove(0);
-            for (Node<ShogiNode> each : getChildren()) {
-                each.setParent(newParent);
-            }
-            newParent.getChildren().addAll(getChildren());
-        }
-        this.getChildren().clear();
-        return newParent;
     }
 
     @Override
@@ -101,32 +61,13 @@ final class ShogiNode implements Node<ShogiNode>, Comparable<ShogiNode> {
         return child;
     }
 
-    @Override
-    public int getValue() {
+    private int getValue() {
         return value;
-    }
-
-    @Override
-    public void setValue(int value) {
-        this.value = value;
     }
 
     @Override
     public boolean isEmpty() {
         return children.isEmpty();
-    }
-
-    @Override
-    public void addChildren(List<ShogiNode> children) {
-        children.forEach(e -> e.setParent(this));
-    }
-
-    @Override
-    public boolean isFirst() {
-        if (getParent() != null)
-            return getParent().getChildren().get(0).equals(this);
-        else
-            return true;
     }
 
     @Override
@@ -136,24 +77,13 @@ final class ShogiNode implements Node<ShogiNode>, Comparable<ShogiNode> {
         return children;
     }
 
-    @Override
-    public ShogiNode getData() {
+    private ShogiNode getData() {
         return this;
     }
 
     @Override
     public ShogiMove getMove() {
         return move;
-    }
-
-    @Override
-    public void setMove(ShogiMove move) {
-        this.move = move;
-    }
-
-    @Override
-    public Node<ShogiNode> getParent() {
-        return parent;
     }
 
     @Override
@@ -166,12 +96,7 @@ final class ShogiNode implements Node<ShogiNode>, Comparable<ShogiNode> {
         int value = getMove().isDrop() ? getValue() - 100 : getValue();
         int other = node.getData().getMove().isDrop() ? node.getValue() - 100 : node.getValue();
 
-        if (value > other)
-            return 1;
-        else if (value == other)
-            return 0;
-        else
-            return -1;
+        return Integer.compare(value, other);
 
 
     }

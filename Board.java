@@ -5,6 +5,7 @@ import tools.Tools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -12,18 +13,15 @@ final class Board implements ShogiBoard {
 
     private static final int SIZE = 9;
     private boolean turn = true;
-    private List<Integer> mochigata = new ArrayList<>();
+    private final List<Integer> mochigata = new ArrayList<>();
     private boolean gameOver = false;
-    private boolean checked = false;
     private int senKingRow = 0;
     private int senKingCol = 0;
     private int goKingRow = 0;
     private int goKingCol = 0;
-    private int checkRow = 0;
-    private int checkCol = 0;
 
     //ENUM-ORDINAL WITHIN 2D ARRAY
-    private int board[][] = new int[SIZE][SIZE];
+    private final int[][] board = new int[SIZE][SIZE];
     private ShogiMove lastMove;
 
     Board() {
@@ -133,63 +131,6 @@ final class Board implements ShogiBoard {
         return value;
     }
 
-    @Override
-    public int see(int row, int col) {
-        int value = 0;
-        ShogiMove move = getSmallestAtk(row, col);
-
-        if (move != null) {
-            int piece = Tools.getValue(board[move.getRow()][move.getCol()]);
-            move(move);
-            value = piece - see(row, col);
-            undo(move);
-        }
-
-        return value;
-    }
-
-    private ShogiMove getSmallestAtk(int row, int col) {
-        int piece = Integer.MAX_VALUE;
-        ShogiMove move = null;
-        endTurn();
-
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                if (isFriend(i, j) && i != row && j != col &&
-                        (Tools.hasRange(board[i][j]) || Tools.areClose(row, col, i, j)) &&
-                        Tools.getValue(board[i][j]) < piece) {
-                    piece = board[i][j];
-                    move = getMovesFor(i, j).stream()
-                            .filter(e -> isAttacking(e, row, col))
-                            .findFirst()
-                            .orElse(null);
-                }
-            }
-        }
-
-        endTurn();
-
-        return move;
-    }
-
-    private boolean isAttacking(ShogiMove move, int t_row, int t_col) {
-
-        int row = move.getRow();
-        int col = move.getCol();
-        int dir = move.getDir();
-        int pow = move.getPow();
-        if (!isLegal(row, col, (dir > 10 ? dir / 10 : dir), pow) || (row == t_row && col == t_col))
-            return false;
-        else {
-
-            row = getRowFor(row, dir, pow, turn);
-            col = getColFor(col, dir, pow, turn);
-
-            return row == t_row && col == t_col;
-        }
-
-    }
-
     private List<ShogiMove> getMovesFor(int row, int col) {
 
         List<ShogiMove> moves = new ArrayList<>();
@@ -197,7 +138,7 @@ final class Board implements ShogiBoard {
 
         int victim;
 
-        for (int dir : sp.getDir()) {
+        for (int dir : Objects.requireNonNull(sp).getDir()) {
 
             if (dir < 10) {
 
@@ -230,12 +171,6 @@ final class Board implements ShogiBoard {
         }
 
         return moves;
-    }
-
-    @Override
-    public boolean isLegal(ShogiMove move) {
-
-        return isLegal(move.getRow(), move.getCol(), move.getDir(), move.getPow());
     }
 
     @Override
@@ -283,9 +218,9 @@ final class Board implements ShogiBoard {
 
         if (inBounds(row, col) &&
                 isFriend(row, col) &&
-                getPiece(row, col).canMove(dir, pow > 1)) {
+                Objects.requireNonNull(getPiece(row, col)).canMove(dir, pow > 1)) {
 
-            if (getPiece(row, col).equals(Koma.KEIMA)) {
+            if (Objects.requireNonNull(getPiece(row, col)).equals(Koma.KEIMA)) {
 
                 row = getRowFor(row, dir, pow, turn);
                 col = getColFor(col, dir, pow, turn);
@@ -319,16 +254,9 @@ final class Board implements ShogiBoard {
 
             int victim = board[newRow][newCol];
             lastMove = new Move(row, col, dir, pow, promo, victim);
-            System.out.printf("Start: [%d][%d]\nZiel: [%d][%d]\n", row, col, newRow, newCol);
             move(row, col, newRow, newCol, promo);
 
         }
-    }
-
-
-    @Override
-    public void setTurn(boolean turn) {
-        this.turn = turn;
     }
 
 
@@ -340,11 +268,7 @@ final class Board implements ShogiBoard {
 
             lastMove = new Move(sp.getOrd(), row, col);
             drop(sp.getOrd(), row, col);
-            if (isChecking(row, col)) {
-                checked = true;
-                checkRow = row;
-                checkCol = col;
-            }
+            isChecking(row, col);
 
             endTurn();
         }
@@ -387,13 +311,7 @@ final class Board implements ShogiBoard {
         return SIZE;
     }
 
-    @Override
-    public boolean isEnemyKing(int row, int col) {
-        return board[row][col] == (turn ? -14 : 14);
-    }
-
-    @Override
-    public boolean isOwnKing(int row, int col) {
+    private boolean isOwnKing(int row, int col) {
         return board[row][col] == (turn ? 14 : -14);
     }
 
@@ -408,7 +326,6 @@ final class Board implements ShogiBoard {
         turn = true;
         mochigata.clear();
         gameOver = false;
-        checked = false;
 
         for (int row = 0; row < SIZE; row++)
             for (int col = 0; col < SIZE; col++)
@@ -464,13 +381,6 @@ final class Board implements ShogiBoard {
     }
 
     @Override
-    public boolean isPromotable(int row, int col) {
-        return isEmpty(row, col) &&
-                (turn ? row < 3 : row > 5) &&
-                getPiece(row, col).isPromotable();
-    }
-
-    @Override
     public int getAvailablePath(int row, int col, int dir) {
 
         int pow = 0;
@@ -498,47 +408,6 @@ final class Board implements ShogiBoard {
     }
 
 
-    private boolean isAttacking(int row, int col, int t_row, int t_col) {
-        ShogiPiece sp = getPiece(row, col);
-        boolean atk = false;
-        int newRow;
-        int newCol;
-
-        if (sp == null) return false;
-        else {
-            for (int dir : sp.getDir()) {
-
-                if (dir < 10) {
-
-                    newRow = getRowFor(row, dir, 1, turn);
-                    newCol = getColFor(col, dir, 1, turn);
-
-                    return newRow == t_row && newCol == t_col;
-
-                } else {
-
-                    dir -= 10;
-
-                    int pow = getAvailablePath(row, col, dir);
-
-                    while (pow > 0 && !atk) {
-
-                        newRow = getRowFor(row, dir, pow, turn);
-                        newCol = getColFor(col, dir, pow, turn);
-
-                        atk = newRow == t_row && newCol == t_col;
-                        if (atk) break;
-                        pow--;
-                    }
-                }
-
-            }
-
-            return atk;
-        }
-    }
-
-
     private boolean isPath(int row, int col, int dir, int pow) {
 
         if (pow == 0)
@@ -556,8 +425,7 @@ final class Board implements ShogiBoard {
     }
 
 
-    @Override
-    public boolean hasSpace(ShogiPiece sp, int row) {
+    private boolean hasSpace(ShogiPiece sp, int row) {
 
         if (sp == null) return false;
         else
@@ -609,7 +477,6 @@ final class Board implements ShogiBoard {
                     while (pow-- > 0) {
                         if (isLegal(row, col, dir, pow)) {
                             value += sp.isPromotable() ? 1 : 2;
-                            ;
                         } else break;
                     }
                 }
@@ -618,8 +485,7 @@ final class Board implements ShogiBoard {
         return value;
     }
 
-    @Override
-    public boolean hasMochi() {
+    private boolean hasMochi() {
         return mochigata.stream()
                 .anyMatch(e -> turn ? e > 0 : e < 0);
     }
@@ -673,7 +539,6 @@ final class Board implements ShogiBoard {
 
         if (move.equals(lastMove)) lastMove = null;
         gameOver = false;
-        checked = false;
 
         endTurn();
 
@@ -748,7 +613,7 @@ final class Board implements ShogiBoard {
         if (isEnemy(t_row, t_col)) {
             ShogiPiece enemy = getPiece(t_row, t_col);
 
-            if (!enemy.equals(Koma.OSHO))
+            if (!Objects.requireNonNull(enemy).equals(Koma.OSHO))
                 mochigata.add(enemy.getOriOrd() * (turn ? 1 : -1));
             else
                 gameOver = true;
@@ -757,7 +622,7 @@ final class Board implements ShogiBoard {
 
         //AUTO-PROMO (FUHYO, KYOSHA, KEIMA)
         if (!hasSpace(sp, t_row) || promo)
-            board[row][col] = sp.getPromOrd() * (turn ? 1 : -1);
+            board[row][col] = Objects.requireNonNull(sp).getPromOrd() * (turn ? 1 : -1);
 
 
         board[t_row][t_col] = board[row][col];

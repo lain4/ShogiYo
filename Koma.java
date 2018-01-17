@@ -2,7 +2,6 @@ package game;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import tools.Tools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,10 +46,10 @@ public enum Koma implements ShogiPiece {
             false, "bug", "+P");                            // 13
 
 
-    private short pattern;
-    private boolean power;
-    private String path;
-    private String symbol;
+    private final short pattern;
+    private final boolean power;
+    private final String path;
+    private final String symbol;
 
     Koma(short pattern, boolean power, String path, String symbol) {
         this.pattern = pattern;
@@ -120,16 +119,6 @@ public enum Koma implements ShogiPiece {
         return new Image(getClass().getResourceAsStream("/assets/" + path + "-P.png"));
     }
 
-    @Override
-    public ShogiPiece getOrigin() {
-        return Tools.getPiece(getOriOrd());
-    }
-
-    @Override
-    public ShogiPiece getPromo() {
-        return Tools.getPiece(getPromOrd());
-    }
-
     //SPLIT SHORT - CHECK DIR/POW'TH BIT
     @Override
     public boolean canMove(int dir, boolean pow) {
@@ -173,14 +162,12 @@ public enum Koma implements ShogiPiece {
     }
 
     //POWER-BYTE
-    @Override
-    public byte getPower() {
+    private byte getPower() {
         return (byte) (pattern >> 8);
     }
 
     //PATTERN-BYTE
-    @Override
-    public byte getPattern() {
+    private byte getPattern() {
         return (byte) (pattern);
     }
 

@@ -7,7 +7,7 @@ import javafx.scene.control.cell.ChoiceBoxListCell;
 
 final class InfoDisplay extends ListView<String> {
 
-    private ObservableList<String> list = FXCollections.observableArrayList();
+    private final ObservableList<String> list = FXCollections.observableArrayList();
     private int count = 0;
     private boolean side = true;
 

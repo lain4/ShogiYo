@@ -22,6 +22,4 @@ public interface ShogiMove extends Comparable<ShogiMove> {
 
     boolean hasKilled();
 
-    ShogiPiece getShogi();
-
 }

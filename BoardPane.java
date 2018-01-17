@@ -16,11 +16,11 @@ final class BoardPane extends GridPane {
     final SimpleBooleanProperty isPromotable = new SimpleBooleanProperty();
     final SimpleBooleanProperty promoted = new SimpleBooleanProperty(false);
     private final int SIZE = board.getSize();
-    private Mochigata senMochi = new Mochigata(true);
-    private Mochigata goMochi = new Mochigata(false);
+    private final Mochigata senMochi = new Mochigata(true);
+    private final Mochigata goMochi = new Mochigata(false);
     private FieldPane activePane;
-    private ToggleGroup tg = new ToggleGroup();
-    private InfoDisplay info = new InfoDisplay();
+    private final ToggleGroup tg = new ToggleGroup();
+    private final InfoDisplay info = new InfoDisplay();
     private int row;
     private int col;
     private int s_row;

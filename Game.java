@@ -13,8 +13,8 @@ import javafx.scene.layout.VBox;
 
 public final class Game extends HBox {
 
-    private BoardPane grid = new BoardPane();
-    private ShogiAI shogAI = new ShogiAI(grid.board);
+    private final BoardPane grid = new BoardPane();
+    private final ShogiAI shogAI = new ShogiAI(grid.board);
 
 
     public Game() {
@@ -131,9 +131,7 @@ public final class Game extends HBox {
         promo.selectedProperty().bindBidirectional(grid.promoted);
 
         promo.disableProperty().bind(grid.isPromotable.not());
-        promo.setOnAction(e -> {
-            grid.promote();
-        });
+        promo.setOnAction(e -> grid.promote());
 
 
         box.getChildren().addAll(redo, promo, confirm);
@@ -157,24 +155,15 @@ public final class Game extends HBox {
 
 
         Button randomMove = new Button("Random");
-        randomMove.setOnAction(e -> {
-
-            grid.exec(shogAI.getRandomMove());
-        });
+        randomMove.setOnAction(e -> grid.exec(shogAI.getRandomMove()));
 
 
         Button miniMaxButton = new Button("NAB");
-        miniMaxButton.setOnAction(e -> {
-
-            grid.exec(shogAI.getAlphaBeta());
-
-        });
+        miniMaxButton.setOnAction(e -> grid.exec(shogAI.getAlphaBeta()));
 
 
         Button lastMove = new Button("Re:last");
-        lastMove.setOnAction(e -> {
-            grid.undoLast();
-        });
+        lastMove.setOnAction(e -> grid.undoLast());
 
 
         Button exit = new Button("Exit");
@@ -185,21 +174,19 @@ public final class Game extends HBox {
 
 
         buttons.getChildren()
-                .addAll(newGame, randomMove, miniMaxButton, lastMove, rotateBoard, exit);
+                .addAll(newGame, miniMaxButton, lastMove, rotateBoard, exit);
 
 
         buttons.getChildren()
-                .forEach(e -> {
-                    e.setStyle("-fx-base: burlywood;" +
-                            "-fx-text-alignment: center;" +
-                            "-fx-font-family: sans-serif;" +
-                            "-fx-font-weight: 300;" +
-                            "-fx-font-size: 16;" +
-                            "-fx-border-style: solid;" +
-                            "-fx-border-color: black;" +
-                            "-fx-pref-height: 50;" +
-                            "-fx-pref-width: 200;");
-                });
+                .forEach(e -> e.setStyle("-fx-base: burlywood;" +
+                        "-fx-text-alignment: center;" +
+                        "-fx-font-family: sans-serif;" +
+                        "-fx-font-weight: bolder;" +
+                        "-fx-font-size: 16;" +
+                        "-fx-border-style: solid;" +
+                        "-fx-border-color: black;" +
+                        "-fx-pref-height: 50;" +
+                        "-fx-pref-width: 200;"));
 
 
         buttons.setStyle("-fx-background-color: black;");
