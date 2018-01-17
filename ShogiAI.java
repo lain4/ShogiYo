@@ -79,15 +79,47 @@ final class ShogiAI {
 
     private int evalPos() {
 
-        return (board.getMaterialValue() * 100 + board.getDef() +
+        return (board.getMaterialValue() * 10 + board.getDef() +
                 board.getPresence());
     }
+
+    private int quiesce(int alpha, int beta) {
+
+        int value = evalPos();
+
+        if (value >= beta)
+            return value;
+        if (alpha < value)
+            alpha = value;
+
+        List<ShogiMove> captures = board.getAllMoves().stream()
+                .filter(ShogiMove::hasKilled)
+                .sorted()
+                .collect(Collectors.toList());
+
+        for (ShogiMove move : captures) {
+
+            board.move(move);
+            value = -quiesce(-beta, -alpha);
+            board.undo(move);
+
+            if (value >= beta)
+                return beta;
+            if (value > alpha)
+                alpha = value;
+        }
+
+        return value * (board.turn() ? 1 : -1);
+    }
+
+
+
 
 
     private int alphaBeta(int depth, int alpha, int beta) {
 
         if (depth == 0)
-            return evalPos();
+            return quiesce(alpha, beta);
 
         int maxValue = alpha;
 
@@ -104,8 +136,10 @@ final class ShogiAI {
                     break;
                 }
 
-                if (depth == maxDepth)
+                if (depth == maxDepth) {
                     myMove = move;
+                    System.out.println("New Move! Value: " + maxValue);
+                }
 
             }
         }
