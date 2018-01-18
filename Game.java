@@ -154,6 +154,9 @@ public final class Game extends HBox {
         Button miniMaxButton = new Button("NAB");
         miniMaxButton.setOnAction(e -> grid.exec(shogAI.getAlphaBeta()));
 
+        Button randomButton = new Button("Random");
+        randomButton.setOnAction(e -> grid.exec(shogAI.getRandomMove()));
+
 
         Button lastMove = new Button("Re:last");
         lastMove.setOnAction(e -> grid.undoLast());
@@ -167,7 +170,7 @@ public final class Game extends HBox {
 
 
         buttons.getChildren()
-                .addAll(newGame, miniMaxButton, lastMove, rotateBoard, exit);
+                .addAll(newGame, miniMaxButton, randomButton, lastMove, rotateBoard, exit);
 
 
         buttons.getChildren()

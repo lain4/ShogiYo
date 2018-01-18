@@ -11,7 +11,7 @@ import tools.Tools;
 final class BoardPane extends GridPane {
 
 
-    final Controller board = new Controller(new Board());
+    final ShogiController board = new Controller(new Board());
     final SimpleBooleanProperty hasMoved = new SimpleBooleanProperty(false);
     final SimpleBooleanProperty isPromotable = new SimpleBooleanProperty();
     final SimpleBooleanProperty promoted = new SimpleBooleanProperty(false);

@@ -8,9 +8,9 @@ import java.util.Objects;
 
 final class Evaluator {
 
-    private final Controller con;
+    private final ShogiController con;
 
-    Evaluator(Controller con) {
+    Evaluator(ShogiController con) {
         this.con = con;
     }
 
@@ -158,21 +158,19 @@ final class Evaluator {
         boolean generalsMoved = true;
 
 
-        for (int col = 0; col < con.getSize(); col++) {
+        for (int col = 2; col < con.getSize() - 2; col++) {
 
             ShogiPiece sp = con.getPiece(con.turn() ? 8 : 0, col);
 
             if (sp != null) {
 
-                value++;
-
                 if ((sp.equals(Koma.KINSHO) ||
                         sp.equals(Koma.GINSHO))) {
 
                     generalsMoved = false;
-                    value -= 40;
-                    break;
-                }
+                    value -= 10;
+                } else
+                    value += 10;
 
             }
 
@@ -180,7 +178,7 @@ final class Evaluator {
 
 
         if (generalsMoved)
-            value += Math.abs(kingCol - con.getSize() / 2) * 4;
+            value += Math.abs(kingCol - con.getSize() / 2) * 5;
 
 
         for (int row = 0; row < con.getSize(); row++) {
@@ -219,9 +217,9 @@ final class Evaluator {
             for (int col = 0; col < con.getSize(); col++) {
 
                 if (con.isFriend(row, col))
-                    value += Tools.getValue(con.getPiece(row, col));
+                    value += Tools.getValue(con.getPiece(row, col)) * 10;
                 else if (con.isEnemy(row, col))
-                    value -= Tools.getValue(con.getPiece(row, col));
+                    value -= Tools.getValue(con.getPiece(row, col)) * 10;
             }
         }
 
@@ -229,7 +227,7 @@ final class Evaluator {
         if (!con.getMochi(con.turn()).isEmpty())
             value += con.getMochi(con.turn())
                     .stream()
-                    .mapToInt(i -> Tools.getValue(i) * (i > 0 ? 1 : -1))
+                    .mapToInt(i -> Tools.getValue(i) * (i > 0 ? 1 : -1) * 11)
                     .sum();
 
         return value;

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
-class Controller implements ShogiController {
+final class Controller implements ShogiController {
 
     private final int[][] board;
     private final int SIZE;
@@ -26,10 +26,12 @@ class Controller implements ShogiController {
         SIZE = board.length;
     }
 
+    @Override
     public boolean gameOver() {
         return gameDone != 0;
     }
 
+    @Override
     public ShogiMove getLastMove() {
         return lastMove;
     }
@@ -38,6 +40,7 @@ class Controller implements ShogiController {
         return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
     }
 
+    @Override
     public int getTarget(int row, int col, int dir, int pow) {
 
         row = Tools.getRowFor(row, dir, pow, turn);
@@ -46,12 +49,14 @@ class Controller implements ShogiController {
         return board[row][col];
     }
 
+    @Override
     public boolean canDrop(ShogiPiece sp, int row, int col) {
         return hasSpace(sp, row) &&
                 !sp.equals(Koma.FUHYO) &&
                 pawnInCol(col);
     }
 
+    @Override
     public boolean isLegal(int row, int col, int dir, int pow) {
 
         if (inBounds(row, col) &&
@@ -71,10 +76,12 @@ class Controller implements ShogiController {
             return false;
     }
 
+    @Override
     public ShogiPiece getPiece(int row, int col) {
         return inBounds(row, col) ? Tools.getPiece(board[row][col]) : null;
     }
 
+    @Override
     public void movePiece(int row, int col, int dir, int pow, boolean promo) {
 
 
@@ -94,6 +101,7 @@ class Controller implements ShogiController {
         }
     }
 
+    @Override
     public void dropPiece(ShogiPiece sp, int row, int col) {
 
         if (!canDrop(sp, row, col))
@@ -116,30 +124,42 @@ class Controller implements ShogiController {
         }
     }
 
+    @Override
     public boolean isFriend(int row, int col) {
         return turn ? board[row][col] > 0 : board[row][col] < 0;
     }
 
+    @Override
     public boolean isEnemy(int row, int col) {
         return turn ? board[row][col] < 0 : board[row][col] > 0;
     }
 
+    @Override
     public boolean isEmpty(int row, int col) {
         return board[row][col] == 0;
     }
 
+    @Override
     public int[][] getBoard() {
         return board;
     }
 
+    @Override
     public int getSize() {
         return SIZE;
     }
 
+    @Override
+    public boolean sideWon() {
+        return gameOver() && gameDone == 1;
+    }
+
+    @Override
     public boolean turn() {
         return turn;
     }
 
+    @Override
     public void newPosition() {
 
         turn = true;
@@ -190,11 +210,13 @@ class Controller implements ShogiController {
 
     }
 
+    @Override
     public boolean pawnInCol(int col) {
         return IntStream.range(0, SIZE)
                 .anyMatch(row -> board[row][col] == (turn ? Koma.FUHYO.ordinal() : -Koma.FUHYO.ordinal()));
     }
 
+    @Override
     public int getAvailablePath(int row, int col, int dir) {
 
         int pow = 0;
@@ -244,35 +266,44 @@ class Controller implements ShogiController {
             }
     }
 
+    @Override
     public List<Integer> getMochi(boolean turn) {
         return sb.getMochi(turn);
     }
 
+    @Override
     public int getSenKingRow() {
         return senKingRow;
     }
 
+    @Override
     public int getSenKingCol() {
         return senKingCol;
     }
 
+    @Override
     public int getGoKingRow() {
         return goKingRow;
     }
 
+    @Override
     public int getGoKingCol() {
         return goKingCol;
     }
 
+    @Override
     public boolean hasMochi() {
         return sb.hasMochi(turn);
     }
 
+    @Override
     public void undo(ShogiMove move) {
 
         if (move.equals(lastMove)) lastMove = null;
 
-        if (gameDone != 0)
+        if (gameDone != 0 &&
+                move.hasKilled() &&
+                Tools.getPiece(move.getVictim()).equals(Koma.OSHO))
             gameDone = 0;
 
         endTurn();
@@ -315,16 +346,19 @@ class Controller implements ShogiController {
 
     }
 
-    private void setGoKing(int row, int col) {
+    @Override
+    public void setGoKing(int row, int col) {
         goKingRow = row;
         goKingCol = col;
     }
 
-    private void setSenKing(int row, int col) {
+    @Override
+    public void setSenKing(int row, int col) {
         senKingRow = row;
         senKingCol = col;
     }
 
+    @Override
     public void move(ShogiMove move) {
 
         if (move.isDrop())
