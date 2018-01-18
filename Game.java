@@ -148,14 +148,7 @@ public final class Game extends HBox {
 
 
         Button newGame = new Button("New Game");
-        newGame.setOnAction(e -> {
-            grid.newGame();
-            shogAI.init();
-        });
-
-
-        Button randomMove = new Button("Random");
-        randomMove.setOnAction(e -> grid.exec(shogAI.getRandomMove()));
+        newGame.setOnAction(e -> grid.newGame());
 
 
         Button miniMaxButton = new Button("NAB");
