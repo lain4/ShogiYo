@@ -1,8 +1,7 @@
 package game;
 
 
-import java.util.List;
-import java.util.Random;
+import java.util.Comparator;
 
 final class ShogiAI {
 
@@ -11,6 +10,7 @@ final class ShogiAI {
     private final Evaluator evaluator;
     private final int maxDepth = 4;
     private ShogiMove myMove = null;
+    private int posCount = 0;
 
 
     ShogiAI(ShogiController board) {
@@ -23,12 +23,13 @@ final class ShogiAI {
         if (board.gameOver())
             return board.sideWon() && board.turn() ? 1_000_000_000 : -1_000_000_000;
 
-        return (evaluator.getMaterialValue() * 100 + evaluator.getDef() +
+        return (evaluator.getMaterialValue() + evaluator.getDef() +
                 evaluator.getPresence());
     }
 
 
     private int alphaBeta(int depth, int alpha, int beta) {
+        posCount++;
 
         if (depth == 0 || board.gameOver())
             return evalPos();
@@ -50,7 +51,7 @@ final class ShogiAI {
 
                 if (depth == maxDepth) {
                     myMove = move;
-                    System.out.println("\nNew Move! -> " + maxValue);
+                    System.out.println("New Move!> " + maxValue + " sho");
                 }
 
             }
@@ -59,18 +60,64 @@ final class ShogiAI {
         return maxValue;
     }
 
-    final ShogiMove getRandomMove() {
-        List<ShogiMove> list = evaluator.getAllMoves();
 
-        return list.get(new Random().nextInt(list.size()));
+    private Node<Integer> createTree() {
+
+        Node<Integer> root = new Node<>(evalPos(), null);
+
+        expandNode(root);
+
+        return root;
+    }
+
+    private void expandNode(Node<Integer> node) {
+
+        for (ShogiMove move : evaluator.getAllMoves()) {
+
+            board.move(move);
+            Node<Integer> child = new Node<>(evalPos(), move);
+            board.undo(move);
+            node.addChild(child);
+        }
+
+    }
+
+
+    private void printTree(Node<Integer> node, String appender) {
+        System.out.println(appender + node.getData());
+        node.getChildren().forEach(each -> printTree(each, appender + appender));
+    }
+
+
+    final ShogiMove getRandomMove() {
+        Node<Integer> move = createTree();
+
+        move = move.getChildren()
+                .stream()
+                .sorted(Comparator.comparingInt(Node::getData))
+                .findFirst().get();
+
+        printTree(move, "_");
+
+        return move.getMove();
     }
 
 
     final ShogiMove getAlphaBeta() {
+        posCount = 0;
 
+        float time = System.nanoTime();
         int value = alphaBeta(maxDepth, -Integer.MAX_VALUE, Integer.MAX_VALUE);
+        time = (System.nanoTime() - time) / 1_000_000_000;
 
-        System.out.println(value);
+        System.out.printf("--------------------\n" +
+                        "SPD\t %.2f s\n" +
+                        "POS\t %d\nTM" +
+                        "P\t %.2f p/s\n" +
+                        "Value\t%d sho\n" +
+                        "--------------------\n",
+                time, posCount, posCount / time, value);
+
         return myMove;
 
     }

@@ -78,6 +78,7 @@ final class Evaluator {
 
 
     private int getPresence(int row, int col) {
+
         int value = 0;
         ShogiPiece sp = con.getPiece(row, col);
 
@@ -94,23 +95,28 @@ final class Evaluator {
                     }
 
                     if (con.isLegal(row, col, dir, pow)) {
-                        value += sp.isPromotable() ? 1 : 2;
+                        value += sp.isPromotable() ? 2 : 3;
                     }
 
                 } else {
 
                     dir -= 10;
 
-                    int pow = con.getAvailablePath(row, col, dir);
+                    int pow = 1;
 
-                    while (pow-- > 0) {
+                    while (true) {
+
                         if (con.isLegal(row, col, dir, pow)) {
-                            value += sp.isPromotable() ? 2 : 3;
-                        } else break;
+                            value += sp.isPromotable() ? 1 : 2;
+                        } else
+                            break;
+
+                        pow++;
                     }
                 }
             }
         }
+
         return value;
     }
 
@@ -149,7 +155,7 @@ final class Evaluator {
     }
 
 
-    public int getDef() {
+    final int getDef() {
 
         int value = 0;
 
@@ -189,17 +195,14 @@ final class Evaluator {
                     ShogiPiece piece = con.getPiece(row, col);
 
                     if (con.isEnemy(row, col)) {
-                        if ((piece.equals(Koma.HISHA) ||
-                                piece.equals(Koma.KYOSHA) ||
-                                piece.equals(Koma.RYUMA)) &&
-                                kingCol == col)
-                            value -= 2;
-                        else
-                            value += (Math.abs(row - kingRow) + Math.abs(col - kingCol)) / 8;
 
-                    } else if (con.isFriend(row, col) && (row != kingRow && col != kingCol))
+                        value += (Math.abs(row - kingRow) + Math.abs(col - kingCol)) / 8;
 
-                        if (Tools.areClose(row, col, kingRow, kingCol) &&
+                    } else if (con.isFriend(row, col) &&
+                            (row != kingRow && col != kingCol) &&
+                            kingRow == (con.turn() ? kingRow - 1 : kingRow + 1))
+
+                        if (Math.abs(kingCol - col) <= 1 &&
                                 !Tools.isT2(piece.getOrd()))
                             value += 2;
                 }
@@ -210,16 +213,16 @@ final class Evaluator {
     }
 
 
-    public int getMaterialValue() {
+    final int getMaterialValue() {
         int value = 0;
 
         for (int row = 0; row < con.getSize(); row++) {
             for (int col = 0; col < con.getSize(); col++) {
 
                 if (con.isFriend(row, col))
-                    value += Tools.getValue(con.getPiece(row, col)) * 10;
+                    value += Tools.getValue(con.getPiece(row, col)) * 5;
                 else if (con.isEnemy(row, col))
-                    value -= Tools.getValue(con.getPiece(row, col)) * 10;
+                    value -= Tools.getValue(con.getPiece(row, col)) * 5;
             }
         }
 
@@ -227,8 +230,16 @@ final class Evaluator {
         if (!con.getMochi(con.turn()).isEmpty())
             value += con.getMochi(con.turn())
                     .stream()
-                    .mapToInt(i -> Tools.getValue(i) * (i > 0 ? 1 : -1) * 11)
-                    .sum();
+                    .mapToInt(Tools::getValue)
+                    .distinct()
+                    .sum() * 6;
+        if (!con.getMochi(!con.turn()).isEmpty())
+            value -= con.getMochi(!con.turn())
+                    .stream()
+                    .mapToInt(Tools::getValue)
+                    .distinct()
+                    .sum() * 6;
+
 
         return value;
     }
