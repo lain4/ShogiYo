@@ -5,6 +5,7 @@ import tools.Tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 final class Evaluator {
 
@@ -13,6 +14,16 @@ final class Evaluator {
     Evaluator(ShogiController con) {
         this.con = con;
     }
+
+    public int evalPos(boolean turn) {
+
+        if (con.gameOver())
+            return con.sideWon() && con.turn() ? 1_000_000_000 : -1_000_000_000;
+
+        return (getMaterialValue(turn) + getDef(turn) +
+                getPresence(turn));
+    }
+
 
     private List<ShogiMove> getMovesFor(int row, int col) {
 
@@ -57,7 +68,15 @@ final class Evaluator {
     }
 
 
-    public int getPresence() {
+    final void setBoard(ShogiBoard sb) {
+        con.setShogiBoard(sb);
+    }
+
+    final int getPresence(boolean turn) {
+
+        boolean prev = con.turn();
+
+        con.setTurn(turn);
 
         int value = 0;
 
@@ -72,6 +91,7 @@ final class Evaluator {
             }
         }
 
+        con.setTurn(prev);
 
         return value + (con.hasMochi() ? 5 : -10);
     }
@@ -121,7 +141,7 @@ final class Evaluator {
     }
 
 
-    public List<ShogiMove> getAllMoves() {
+    final List<ShogiMove> getAllMoves() {
 
         List<ShogiMove> list = new ArrayList<>();
 
@@ -151,11 +171,19 @@ final class Evaluator {
             }
         }
 
-        return list;
+
+        return list.stream()
+                .filter(move -> con.isLegal(move.getRow(), move.getCol(), move.getDir(), move.getPow()))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
 
-    final int getDef() {
+    final int getDef(boolean turn) {
+
+        boolean prev = con.turn();
+
+        con.setTurn(turn);
 
         int value = 0;
 
@@ -209,11 +237,17 @@ final class Evaluator {
             }
         }
 
+        con.setTurn(prev);
+
         return value;
     }
 
 
-    final int getMaterialValue() {
+    final int getMaterialValue(boolean turn) {
+
+        boolean prev = con.turn();
+
+        con.setTurn(turn);
         int value = 0;
 
         for (int row = 0; row < con.getSize(); row++) {
@@ -240,6 +274,7 @@ final class Evaluator {
                     .distinct()
                     .sum() * 6;
 
+        con.setTurn(prev);
 
         return value;
     }

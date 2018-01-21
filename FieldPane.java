@@ -25,8 +25,7 @@ final class FieldPane extends ToggleButton {
                 "-fx-border-width: 1;" +
                 "-fx-border-color: black;" +
                 "-fx-border-image-insets: 0.5;" +
-                "-fx-border-style: dashed;" +
-                //"-fx-background-color:  " +
+                "-fx-border-style: solid;" +
                 "-fx-min-width: 80;" +
                 "-fx-min-height: 85;" +
                 "-fx-base:" + (color ? "slategrey" : "#ecca8f;"));

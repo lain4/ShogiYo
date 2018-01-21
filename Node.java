@@ -8,19 +8,13 @@ import java.util.List;
 public class Node<T> {
 
     private T data = null;
-    private ShogiMove move;
 
     private List<Node<T>> children = new ArrayList<>();
 
     private Node<T> parent = null;
 
-    Node(T data, ShogiMove move) {
+    Node(T data) {
         this.data = data;
-        this.move = move;
-    }
-
-    public ShogiMove getMove() {
-        return move;
     }
 
 
@@ -28,6 +22,10 @@ public class Node<T> {
         child.setParent(this);
         children.add(child);
         return child;
+    }
+
+    public boolean isLeaf() {
+        return children.isEmpty();
     }
 
     public void addChildren(List<Node<T>> children) {

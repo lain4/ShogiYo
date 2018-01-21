@@ -10,7 +10,7 @@ final class Move implements ShogiMove {
     private int pow;
     private boolean promo;
     private int victim = 0;
-    private int drop = 0;
+    private int piece = 0;
 
     Move(int row, int col, int dir, int pow, boolean promo, int victim) {
         this.row = row;
@@ -21,25 +21,25 @@ final class Move implements ShogiMove {
         this.victim = victim;
     }
 
-    Move(int drop, int row, int col) {
+    Move(int piece, int row, int col) {
         this.row = row;
         this.col = col;
-        this.drop = drop;
+        this.piece = piece;
     }
 
     @Override
     public int compareTo(ShogiMove other) {
-        return Integer.compare(Tools.getValue(victim), Tools.getValue(other.getVictim()));
+        return Integer.compare(Tools.getValue(other.getVictim()), Tools.getValue(getVictim()));
     }
 
     @Override
     public ShogiPiece getShogiDrop() {
-        return Tools.getPiece(drop);
+        return Tools.getPiece(piece);
     }
 
     @Override
     public int getDrop() {
-        return drop;
+        return piece;
     }
 
     @Override
@@ -49,7 +49,7 @@ final class Move implements ShogiMove {
 
     @Override
     public boolean isDrop() {
-        return drop != 0;
+        return piece != 0;
     }
 
     @Override

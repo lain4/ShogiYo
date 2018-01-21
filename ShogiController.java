@@ -32,6 +32,12 @@ interface ShogiController {
 
     int getSize();
 
+    ShogiBoard getShogiBoard();
+
+    void setShogiBoard(ShogiBoard sb);
+
+    void setTurn(boolean turn);
+
     boolean sideWon();
 
     boolean turn();

@@ -10,7 +10,7 @@ final class Controller implements ShogiController {
 
     private final int[][] board;
     private final int SIZE;
-    private final ShogiBoard sb;
+    private ShogiBoard sb;
     private boolean turn = true;
     private int senKingRow = 0;
     private int senKingCol = 0;
@@ -32,12 +32,28 @@ final class Controller implements ShogiController {
     }
 
     @Override
+    public void setTurn(boolean turn) {
+        this.turn = turn;
+    }
+
+    @Override
     public ShogiMove getLastMove() {
         return lastMove;
     }
 
     private boolean inBounds(int row, int col) {
         return row >= 0 && row < SIZE && col >= 0 && col < SIZE;
+    }
+
+    @Override
+    public ShogiBoard getShogiBoard() {
+        return sb;
+    }
+
+    @Override
+    public void setShogiBoard(ShogiBoard sb) {
+        if (!this.sb.equals(sb))
+            this.sb = sb;
     }
 
     @Override

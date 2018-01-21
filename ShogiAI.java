@@ -1,7 +1,7 @@
 package game;
 
 
-import java.util.Comparator;
+import java.util.List;
 
 final class ShogiAI {
 
@@ -18,29 +18,39 @@ final class ShogiAI {
         evaluator = new Evaluator(board);
     }
 
-    private int evalPos() {
-
-        if (board.gameOver())
-            return board.sideWon() && board.turn() ? 1_000_000_000 : -1_000_000_000;
-
-        return (evaluator.getMaterialValue() + evaluator.getDef() +
-                evaluator.getPresence());
-    }
-
 
     private int alphaBeta(int depth, int alpha, int beta) {
         posCount++;
 
         if (depth == 0 || board.gameOver())
-            return evalPos();
+            return evaluator.evalPos(board.turn());
 
         int maxValue = alpha;
+        List<ShogiMove> moves = evaluator.getAllMoves();
 
-        for (ShogiMove move : evaluator.getAllMoves()) {
+        for (ShogiMove move : moves) {
 
-            board.move(move);
-            int value = -alphaBeta(depth - 1, -beta, -maxValue);
-            board.undo(move);
+            int value;
+
+            if (moves.get(0).equals(move)) {
+
+                board.move(move);
+                value = -alphaBeta(depth - 1, -beta, -maxValue);
+                board.undo(move);
+
+            } else {
+
+                board.move(move);
+                value = -alphaBeta(depth - 1, -maxValue - 1, -maxValue);
+                board.undo(move);
+
+                if (alpha < value && value < beta) {
+
+                    board.move(move);
+                    value = -alphaBeta(depth - 1, -beta, -value);
+                    board.undo(move);
+                }
+            }
 
             if (value > maxValue) {
                 maxValue = value;
@@ -60,22 +70,53 @@ final class ShogiAI {
         return maxValue;
     }
 
+    private int alphaBeta(Node<ShogiBoard> node, int depth, int alpha, int beta, boolean isMaxing) {
+        posCount++;
 
-    private Node<Integer> createTree() {
+        if (depth == 0 || node.isLeaf() || board.gameOver())
+            return evaluator.evalPos(isMaxing);
 
-        Node<Integer> root = new Node<>(evalPos(), null);
+        int maxValue = alpha;
+        evaluator.setBoard(node.getData());
+
+        for (Node<ShogiBoard> child : node.getChildren()) {
+
+            int value = -alphaBeta(child, depth - 1, -beta, -maxValue, !isMaxing);
+
+            if (value > maxValue) {
+                maxValue = value;
+
+                if (maxValue > beta) {
+                    break;
+                }
+
+                if (depth == maxDepth) {
+                    System.out.println("New Move!> " + maxValue + " sho");
+                }
+
+            }
+        }
+
+        return maxValue;
+    }
+
+
+    private <ShogiBoard> Node<ShogiBoard> createTree() {
+
+
+        Node<ShogiBoard> root = new Node<>((ShogiBoard) board.getShogiBoard());
 
         expandNode(root);
 
         return root;
     }
 
-    private void expandNode(Node<Integer> node) {
+    private <ShogiBoard> void expandNode(Node<ShogiBoard> node) {
 
         for (ShogiMove move : evaluator.getAllMoves()) {
 
             board.move(move);
-            Node<Integer> child = new Node<>(evalPos(), move);
+            Node<ShogiBoard> child = new Node<>((ShogiBoard) board.getShogiBoard());
             board.undo(move);
             node.addChild(child);
         }
@@ -90,16 +131,12 @@ final class ShogiAI {
 
 
     final ShogiMove getRandomMove() {
-        Node<Integer> move = createTree();
-
-        move = move.getChildren()
+        ShogiMove move = evaluator.getAllMoves()
                 .stream()
-                .sorted(Comparator.comparingInt(Node::getData))
-                .findFirst().get();
+                .findFirst()
+                .get();
 
-        printTree(move, "_");
-
-        return move.getMove();
+        return move;
     }
 
 
@@ -112,8 +149,8 @@ final class ShogiAI {
 
         System.out.printf("--------------------\n" +
                         "SPD\t %.2f s\n" +
-                        "POS\t %d\nTM" +
-                        "P\t %.2f p/s\n" +
+                        "POS\t %d\n" +
+                        "TMP\t %.2f p/s\n" +
                         "Value\t%d sho\n" +
                         "--------------------\n",
                 time, posCount, posCount / time, value);
