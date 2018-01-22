@@ -65,14 +65,12 @@ public enum Koma implements ShogiPiece {
         if (equals(Koma.KEIMA))
             return new int[]{5, 7};
 
-        else {
-
-            for (int i = 0; i < 8; i++) {
-                if (canMove(i, false)) {
+        else
+            //IF RANGE THEN dir *= 10
+            for (int i = 0; i < 8; i++)
+                if (canMove(i, false))
                     list.add(i + (canMove(i, true) ? 10 : 0));
-                }
-            }
-        }
+
 
         return list.stream()
                 .mapToInt(i -> i)
@@ -121,7 +119,7 @@ public enum Koma implements ShogiPiece {
         return new Image(getClass().getResourceAsStream("/assets/" + path + "-P.png"));
     }
 
-    //SPLIT SHORT - CHECK DIR/POW'TH BIT
+
     @Override
     public boolean canMove(int dir, boolean pow) {
 
@@ -164,12 +162,12 @@ public enum Koma implements ShogiPiece {
             return ordinal();
     }
 
-    //POWER-BYTE
+
     private byte getPower() {
         return (byte) (pattern >> 8);
     }
 
-    //PATTERN-BYTE
+
     private byte getPattern() {
         return (byte) (pattern);
     }
