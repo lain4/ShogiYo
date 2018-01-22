@@ -29,6 +29,7 @@ final class Evaluator {
 
         List<ShogiMove> moves = new ArrayList<>();
         ShogiPiece sp = con.getPiece(row, col);
+        int pow;
 
         int victim;
 
@@ -36,21 +37,24 @@ final class Evaluator {
 
             if (dir < 10) {
 
-                if (con.isLegal(row, col, dir, 1)) {
+                if (sp.equals(Koma.KEIMA)) {
+                    dir *= 10;
+                    pow = 2;
+                } else
+                    pow = 1;
 
-                    if (sp.equals(Koma.KEIMA))
-                        dir *= 10;
+                if (con.isLegal(row, col, dir, pow)) {
 
-                    victim = con.getTarget(row, col, dir, 1);
+                    victim = con.getTarget(row, col, dir, pow);
 
-                    moves.add(new Move(row, col, dir, 1, sp.isPromotable(), victim));
+                    moves.add(new Move(row, col, dir, pow, sp.isPromotable(), victim));
                 }
 
             } else {
 
                 dir -= 10;
 
-                int pow = con.getAvailablePath(row, col, dir);
+                pow = con.getAvailablePath(row, col, dir);
 
                 while (pow > 0) {
 
@@ -114,9 +118,9 @@ final class Evaluator {
                         pow = 2;
                     }
 
-                    if (con.isLegal(row, col, dir, pow)) {
-                        value += sp.isPromotable() ? 2 : 3;
-                    }
+                    if (con.isLegal(row, col, dir, pow))
+                        value += sp.isPromotable() ? 3 : 4;
+
 
                 } else {
 
@@ -126,9 +130,9 @@ final class Evaluator {
 
                     while (true) {
 
-                        if (con.isLegal(row, col, dir, pow)) {
-                            value += sp.isPromotable() ? 1 : 2;
-                        } else
+                        if (con.isLegal(row, col, dir, pow))
+                            value += sp.isPromotable() ? 2 : 3;
+                        else
                             break;
 
                         pow++;
@@ -147,8 +151,8 @@ final class Evaluator {
 
         ShogiPiece[] mochi = con.hasMochi() ? con.getMochi(con.turn())
                 .stream()
-                .map(Tools::getPiece)
                 .distinct()
+                .map(Tools::getPiece)
                 .toArray(ShogiPiece[]::new) : null;
 
 
@@ -161,10 +165,12 @@ final class Evaluator {
                 else if (con.isEmpty(i, j) && mochi != null) {
 
                     for (ShogiPiece sp : mochi) {
+
                         if (con.canDrop(sp, i, j)) {
                             ShogiMove move = new Move(sp.getOrd(), i, j);
                             list.add(move);
                         }
+
                     }
 
                 }
@@ -173,7 +179,6 @@ final class Evaluator {
 
 
         return list.stream()
-                .filter(move -> con.isLegal(move.getRow(), move.getCol(), move.getDir(), move.getPow()))
                 .sorted()
                 .collect(Collectors.toList());
     }
@@ -212,7 +217,7 @@ final class Evaluator {
 
 
         if (generalsMoved)
-            value += Math.abs(kingCol - con.getSize() / 2) * 5;
+            value += Math.abs(kingCol - (con.getSize() / 2 - 1)) * 5;
 
 
         for (int row = 0; row < con.getSize(); row++) {
@@ -254,9 +259,9 @@ final class Evaluator {
             for (int col = 0; col < con.getSize(); col++) {
 
                 if (con.isFriend(row, col))
-                    value += Tools.getValue(con.getPiece(row, col)) * 5;
+                    value += Tools.getValue(con.getPiece(row, col));
                 else if (con.isEnemy(row, col))
-                    value -= Tools.getValue(con.getPiece(row, col)) * 5;
+                    value -= Tools.getValue(con.getPiece(row, col));
             }
         }
 
@@ -266,13 +271,14 @@ final class Evaluator {
                     .stream()
                     .mapToInt(Tools::getValue)
                     .distinct()
-                    .sum() * 6;
+                    .sum();
+
         if (!con.getMochi(!con.turn()).isEmpty())
             value -= con.getMochi(!con.turn())
                     .stream()
                     .mapToInt(Tools::getValue)
                     .distinct()
-                    .sum() * 6;
+                    .sum();
 
         con.setTurn(prev);
 

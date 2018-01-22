@@ -2,6 +2,7 @@ package game;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 final class ShogiAI {
 
@@ -16,6 +17,42 @@ final class ShogiAI {
     ShogiAI(ShogiController board) {
         this.board = board;
         evaluator = new Evaluator(board);
+    }
+
+
+    private int quiescence(int alpha, int beta) {
+        posCount++;
+
+        List<ShogiMove> moves = evaluator.getAllMoves()
+                .stream()
+                .filter(ShogiMove::hasKilled)
+                .collect(Collectors.toList());
+
+        if (board.gameOver() || moves.isEmpty())
+            return evaluator.evalPos(board.turn());
+
+
+        for (ShogiMove move : moves) {
+
+            int value;
+
+            board.move(move);
+            value = -quiescence(-beta, -alpha);
+            board.undo(move);
+
+
+            if (value > alpha) {
+                alpha = value;
+
+                if (alpha > beta) {
+                    break;
+                }
+
+            }
+        }
+
+        return alpha;
+
     }
 
 
@@ -55,7 +92,7 @@ final class ShogiAI {
             if (value > maxValue) {
                 maxValue = value;
 
-                if (maxValue > beta) {
+                if (maxValue >= beta) {
                     break;
                 }
 

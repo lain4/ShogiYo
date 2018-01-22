@@ -62,7 +62,7 @@ final class Controller implements ShogiController {
         row = Tools.getRowFor(row, dir, pow, turn);
         col = Tools.getColFor(col, dir, pow, turn);
 
-        return board[row][col];
+        return inBounds(row, col) ? board[row][col] : 0;
     }
 
     @Override
