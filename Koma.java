@@ -93,25 +93,27 @@ public enum Koma implements ShogiPiece {
     @Override
     public int getOriOrd() {
 
-        if (!power && !this.equals(Koma.OSHO))
+        if (!power)
 
-            switch (getOrd()) {
-                case 7:
+            switch (this) {
+                case RYUO:
                     return 1;
-                case 8:
+                case RYUMA:
                     return 2;
-                case 10:
+                case NARIGIN:
                     return 3;
-                case 11:
+                case NARIKEI:
                     return 4;
-                case 12:
+                case NARIKYO:
                     return 5;
+                case OSHO:
+                    return 14;
                 default:
                     return 6;
             }
 
         else
-            return getOrd();
+            return ordinal();
     }
 
     @Override
@@ -142,23 +144,24 @@ public enum Koma implements ShogiPiece {
     public int getPromOrd() {
         if (power)
 
-            switch (getOrd()) {
-                case 1:
+            switch (this) {
+
+                case HISHA:
                     return 7;
-                case 2:
+                case KAKUGYO:
                     return 8;
-                case 3:
+                case GINSHO:
                     return 10;
-                case 4:
+                case KEIMA:
                     return 11;
-                case 5:
+                case KYOSHA:
                     return 12;
                 default:
                     return 13;
             }
 
         else
-            return getOrd();
+            return ordinal();
     }
 
     //POWER-BYTE

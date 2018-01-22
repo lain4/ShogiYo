@@ -68,8 +68,8 @@ final class Controller implements ShogiController {
     @Override
     public boolean canDrop(ShogiPiece sp, int row, int col) {
         return hasSpace(sp, row) &&
-                !sp.equals(Koma.FUHYO) &&
-                pawnInCol(col);
+                (!sp.equals(Koma.FUHYO) ||
+                        !pawnInCol(col));
     }
 
     @Override

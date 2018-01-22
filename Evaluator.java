@@ -265,20 +265,14 @@ final class Evaluator {
             }
         }
 
+        List<Integer> mochi = con.getShogiBoard().getMochi();
 
-        if (!con.getMochi(con.turn()).isEmpty())
-            value += con.getMochi(con.turn())
-                    .stream()
-                    .mapToInt(Tools::getValue)
-                    .distinct()
-                    .sum();
+        if (!mochi.isEmpty()) {
 
-        if (!con.getMochi(!con.turn()).isEmpty())
-            value -= con.getMochi(!con.turn())
-                    .stream()
+            value += mochi.stream()
                     .mapToInt(Tools::getValue)
-                    .distinct()
-                    .sum();
+                    .sum() * (turn ? 1 : -1);
+        }
 
         con.setTurn(prev);
 

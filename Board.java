@@ -13,9 +13,11 @@ final class Board implements ShogiBoard {
 
     private final int[][] board = new int[SIZE][SIZE];
 
-    Board() {
-    }
 
+    @Override
+    public List<Integer> getMochi() {
+        return mochigata;
+    }
 
     @Override
     public int[][] getBoard() {

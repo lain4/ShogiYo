@@ -13,6 +13,8 @@ interface ShogiBoard {
 
     List<Integer> getMochi(boolean player);
 
+    List<Integer> getMochi();
+
     boolean dropExists(int piece);
 
     boolean hasMochi(boolean turn);
